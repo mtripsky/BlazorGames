@@ -1,0 +1,23 @@
+﻿@page "/connectfour"
+@using ConnectFour.Data;
+
+<h1>ConnectFour</h1>
+
+@code{
+    GameBoard board = new GameBoard();
+    PieceColor currentTurn = PieceColor.Red;
+}
+
+<h2>@currentTurn's Turn!</h2>
+
+<div class="board">
+    @for (int i = 0; i < 7; i++)
+    {
+        <div class="column">
+            @for (int j = 0; j < 6; j++)
+            {
+                <div class="gamepiece @board.Board[i,j].Color.ToString().ToLower()"></div>
+            }
+        </div>
+    }
+</div>
