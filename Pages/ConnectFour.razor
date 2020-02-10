@@ -1,14 +1,179 @@
 ﻿@page "/connectfour"
-@using ConnectFour.Data;
+@using BlazorGames.ConnectFour.Data;
 
 <h1>ConnectFour</h1>
 
 @code{
-    GameBoard board = new GameBoard();
-    PieceColor currentTurn = PieceColor.Red;
+        GameBoard board = new GameBoard();
+        PieceColor currentTurn = PieceColor.Red;
+        PieceColor winner = PieceColor.Blank;
+
+        private void PieceClicked(int x, int y)
+        {
+            if (winner == PieceColor.Blank)
+            {
+                var clickedSpace = board.Board[x, y];
+                //The piece must "fall" to the lowest unoccupied space in the clicked column
+                if (clickedSpace.Color == PieceColor.Blank)
+                {
+                    while (y < 5)
+                    {
+                        var nextSpace = board.Board[x, y + 1];
+                        y = y + 1;
+                        if (nextSpace.Color == PieceColor.Blank)
+                            clickedSpace = nextSpace;
+                    }
+                    clickedSpace.Color = currentTurn;
+                    winner = GetWinner();
+                    SwitchTurns();
+                }
+            }
+        }
+
+        private void SwitchTurns()
+        {
+            if (currentTurn == PieceColor.Red)
+            {
+                currentTurn = PieceColor.Yellow;
+            }
+            else
+            {
+                currentTurn = PieceColor.Red;
+            }
+        }
+
+    private enum EvaluationDirection
+    {
+        Horizontal,
+        Vertical,
+        Diagonal1,
+        Diagonal2
+    }
+
+    private PieceColor GetWinner()
+    {
+        PieceColor winnerColor = PieceColor.Blank;
+
+        for (int i = 0; i < 7; i++)
+        {
+            for (int j = 0; j < 6; j++)
+            {
+                PieceColor winner = EvaluatePieceForWinner(i, j, EvaluationDirection.Horizontal);
+                if (winner != PieceColor.Blank) { return winner; }
+
+                winner = EvaluatePieceForWinner(i, j, EvaluationDirection.Vertical);
+                if (winner != PieceColor.Blank) { return winner; }
+
+                winner = EvaluatePieceForWinner(i, j, EvaluationDirection.Diagonal1);
+                if (winner != PieceColor.Blank) { return winner; }
+
+                winner = EvaluatePieceForWinner(i, j, EvaluationDirection.Diagonal2);
+                if (winner != PieceColor.Blank) { return winner; }
+            }
+        }
+
+        return winnerColor;
+
+    }
+
+    private PieceColor EvaluatePieceForWinner(int i, int j, EvaluationDirection dir)
+    {
+        GamePiece startPiece = board.Board[i, j];
+        if (startPiece.Color == PieceColor.Blank)
+        {
+            return PieceColor.Blank;
+        }
+
+        int inARow = 1;
+        int iNext1 = i;
+        int jNext1 = j;
+        int iNext2 = i;
+        int jNext2 = j;
+
+        while (inARow < 4)
+        {
+            switch (dir)
+            {
+                case EvaluationDirection.Horizontal:
+                    --iNext1;
+                    break;
+                case EvaluationDirection.Vertical:
+                    --jNext1;
+                    break;
+                case EvaluationDirection.Diagonal1:
+                    --iNext1;
+                    --jNext1;
+                    break;
+                case EvaluationDirection.Diagonal2:
+                    --iNext1;
+                    ++jNext1;
+                    break;
+            }
+
+            if (!IsOnBoard(iNext1, jNext1)) { break; }
+            if (board.Board[iNext1, jNext1].Color == startPiece.Color)
+            {
+                inARow++;
+            }
+            else
+            {
+                return PieceColor.Blank;
+            }
+        }
+        while (inARow < 4)
+        {
+            switch (dir)
+            {
+                case EvaluationDirection.Horizontal:
+                    ++iNext2;
+                    break;
+                case EvaluationDirection.Vertical:
+                    ++jNext2;
+                    break;
+                case EvaluationDirection.Diagonal1:
+                    ++iNext2;
+                    ++jNext2;
+                    break;
+                case EvaluationDirection.Diagonal2:
+                    ++iNext2;
+                    --jNext2;
+                    break;
+            }
+
+            if (!IsOnBoard(iNext2, jNext2)) { break; }
+            if (board.Board[iNext2, jNext2].Color == startPiece.Color)
+            {
+                inARow++;
+            }
+            else
+            {
+                return PieceColor.Blank;
+            }
+        }
+        return inARow >= 4 ? startPiece.Color : PieceColor.Blank;
+    }
+
+    private bool IsOnBoard(int i, int j)
+    {
+        return !(i < 0 || i > 6 || j < 0 || j > 5);
+    }
+
+    private void Reset()
+    {
+        board = new GameBoard();
+        currentTurn = PieceColor.Red;
+        winner = PieceColor.Blank;
+    }
 }
 
-<h2>@currentTurn's Turn!</h2>
+@if (winner == PieceColor.Blank)
+{
+    <h2>@currentTurn's Turn!</h2>
+
+} else
+{
+    <h2>@winner Wins! <button class="btn btn-success" @onclick="@(() => Reset())">Reset</button></h2>
+}
 
 <div class="board">
     @for (int i = 0; i < 7; i++)
@@ -16,7 +181,10 @@
         <div class="column">
             @for (int j = 0; j < 6; j++)
             {
-                <div class="gamepiece @board.Board[i,j].Color.ToString().ToLower()"></div>
+                int x = i;
+                int y = j;
+                <div class="gamepiece @board.Board[i,j].Color.ToString().ToLower()"
+                     @onclick="@(() => PieceClicked(x,y))"></div>
             }
         </div>
     }
