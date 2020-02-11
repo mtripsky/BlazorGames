@@ -1,0 +1,86 @@
+﻿@page "/minesweeper"
+@using BlazorGames.Data.Minesweeper;
+@using BlazorGames.Games.Minesweeper;
+@using Microsoft.AspNetCore.Components.Web;
+
+<h1>Minesweeper</h1>
+
+@code{
+    static int size = 10;
+    GameBoard board = new GameBoardGenerator().Generate(size, 10);
+    bool isWinner = false;
+    bool isLosser = false;
+
+    private void PieceClicked(MouseEventArgs args, int x, int y)
+    {
+        var boardPiece = board.Board[x, y];
+        if (args.Button == 0)
+        {
+            if (boardPiece.IsMine)
+            {
+                boardPiece.Color = PieceColor.Mine;
+                isLosser = true;
+            }
+            else
+            {
+                boardPiece.IsRevealed = true;
+                if(boardPiece.NeighborBombCount == 0)
+                {
+                    boardPiece.Color = PieceColor.Blank;
+                    // generate BFS to reveale surrondings 
+                }
+                else
+                {
+                    boardPiece.Color = PieceColor.NeighborBomb;
+                }
+            }
+        }
+        if (args.Button == 2)
+        {
+            boardPiece.Color = PieceColor.Safe;
+        }
+    }
+
+
+    private object GetBoardContent(int x, int y)
+    {
+        return board.Board[x, y].IsRevealed
+            ? board.Board[x, y].NeighborBombCount.ToString()
+            : "";
+    }
+
+    private void Reset()
+    {
+    }
+}
+
+@if (isWinner)
+{
+    <h2>Wins! <button class="btn btn-success" @onclick="@(() => Reset())">Reset</button></h2>
+} else if (isLosser)
+{
+    <h2>LOSSES! <button class="btn btn-success" @onclick="@(() => Reset())">Reset</button></h2>
+} else
+{
+
+}
+
+<div class="minesboard">
+    @for (int i = 0; i < size; i++)
+    {
+        <div class="minescolumn">
+            @for (int j = 0; j < size; j++)
+            {
+                int x = i;
+                int y = j;
+
+                <div class="minesgamepiece @board.Board[i,j].Color.ToString().ToLower()"
+                     @onclick="@((args) => PieceClicked(args, x,y))"
+                     oncontextmenu="return false;"
+                     @onmouseup="@((args) => PieceClicked(args, x,y))">
+                    @GetBoardContent(x, y)
+                </div>
+            }
+        </div>
+    }
+</div>
