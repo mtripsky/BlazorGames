@@ -8,6 +8,6 @@ namespace BlazorGames.Data.Minesweeper
         Blank,
         NeighborBomb,
         Mine,
-        Safe
+        MineFlag
     }
 }

@@ -9,9 +9,9 @@ a, .btn-link {
 }
 
 .btn-primary {
-  color: #fff;
-  background-color: #1b6ec2;
-  border-color: #1861ac;
+    color: #fff;
+    background-color: #1b6ec2;
+    border-color: #1861ac;
 }
 
 app {
@@ -30,66 +30,66 @@ app {
     flex: 1;
 }
 
-.main .top-row {
-    background-color: #f7f7f7;
-    border-bottom: 1px solid #d6d5d5;
-    justify-content: flex-end;
-}
+    .main .top-row {
+        background-color: #f7f7f7;
+        border-bottom: 1px solid #d6d5d5;
+        justify-content: flex-end;
+    }
 
-.main .top-row > a {
-    margin-left: 1.5rem;
-}
+        .main .top-row > a {
+            margin-left: 1.5rem;
+        }
 
 .sidebar {
     background-image: linear-gradient(180deg, rgb(5, 39, 103) 0%, #3a0647 70%);
 }
 
-.sidebar .top-row {
-    background-color: rgba(0,0,0,0.4);
-}
+    .sidebar .top-row {
+        background-color: rgba(0,0,0,0.4);
+    }
 
-.sidebar .navbar-brand {
-    font-size: 1.1rem;
-}
+    .sidebar .navbar-brand {
+        font-size: 1.1rem;
+    }
 
-.sidebar .oi {
-    width: 2rem;
-    font-size: 1.1rem;
-    vertical-align: text-top;
-    top: -2px;
-}
+    .sidebar .oi {
+        width: 2rem;
+        font-size: 1.1rem;
+        vertical-align: text-top;
+        top: -2px;
+    }
 
 .nav-item {
     font-size: 0.9rem;
     padding-bottom: 0.5rem;
 }
 
-.nav-item:first-of-type {
-    padding-top: 1rem;
-}
+    .nav-item:first-of-type {
+        padding-top: 1rem;
+    }
 
-.nav-item:last-of-type {
-    padding-bottom: 1rem;
-}
+    .nav-item:last-of-type {
+        padding-bottom: 1rem;
+    }
 
-.nav-item a {
-    color: #d7d7d7;
-    border-radius: 4px;
-    height: 3rem;
-    display: flex;
-    align-items: center;
-    line-height: 3rem;
-}
+    .nav-item a {
+        color: #d7d7d7;
+        border-radius: 4px;
+        height: 3rem;
+        display: flex;
+        align-items: center;
+        line-height: 3rem;
+    }
 
-.nav-item a.active {
-    background-color: rgba(255,255,255,0.25);
-    color: white;
-}
+        .nav-item a.active {
+            background-color: rgba(255,255,255,0.25);
+            color: white;
+        }
 
-.nav-item a:hover {
-    background-color: rgba(255,255,255,0.1);
-    color: white;
-}
+        .nav-item a:hover {
+            background-color: rgba(255,255,255,0.1);
+            color: white;
+        }
 
 .content {
     padding-top: 1.1rem;
@@ -151,67 +151,67 @@ app {
 
 .board {
     background-color: blue;
-    display:flex;
-    flex-direction:row;
-    max-width:490px;
+    display: flex;
+    flex-direction: row;
+    max-width: 490px;
 }
 
 .column {
-    min-width:60px;
-    min-height:60px;
-    height:100%;
+    min-width: 60px;
+    min-height: 60px;
+    height: 100%;
 }
 
 .gamepiece {
-    border:solid 1px black;
-    margin:5px;
-    min-height:60px;
-    min-width:60px;
-    border-radius:50px;
+    border: solid 1px black;
+    margin: 5px;
+    min-height: 60px;
+    min-width: 60px;
+    border-radius: 50px;
 }
 
-.red{
-    background-color:red;
+.red {
+    background-color: red;
 }
 
-.yellow{
-    background-color:yellow;
+.yellow {
+    background-color: yellow;
 }
 
 .blank {
-    background-color:white;
+    background-color: white;
 }
 
 .minesboard {
     background-color: white;
-    display:flex;
-    flex-direction:row;
+    display: flex;
+    flex-direction: row;
 }
 
 .minescolumn {
-    min-width:40px;
-    min-height:40px;
-    height:100%;
+    min-width: 40px;
+    min-height: 40px;
+    height: 100%;
 }
 
 .minesgamepiece {
-    border:solid 2px #595959;
-    margin:2px;
-    min-height:40px;
-    min-width:40px;
+    border: solid 2px #595959;
+    margin: 2px;
+    min-height: 40px;
+    min-width: 40px;
 }
 
 .initial {
-    background-color:#b3b3b3;
+    background-color: #b3b3b3;
 }
 
 .blank {
-    background-color:#f2f2f2;
+    background-color: #f2f2f2;
 }
 
 .neighborbomb {
     font: 20px Arial, sans-serif;
-    background-color:#f2f2f2;
+    background-color: #f2f2f2;
     color: blue;
     padding: 5px 0px;
     text-align: center;
@@ -219,5 +219,10 @@ app {
 
 .mine {
     background-image: url('images/mine.jpg');
+    background-size: contain;
+}
+
+.mineflag {
+    background-image: url('images/mineFlag.png');
     background-size: contain;
 }

@@ -7,62 +7,89 @@
 
 @code{
     static int size = 10;
-    GameBoard board = new GameBoardGenerator().Generate(size, 10);
+    static int mineCount = 10;
+    GameBoard board = new GameBoardGenerator().Generate(size, mineCount);
+    GameBoardRevealer revealer = new GameBoardRevealer();
     bool isWinner = false;
-    bool isLosser = false;
+    bool isLoser = false;
+    int flagCounter = 0;
+    int correctGuess = 0;
 
     private void PieceClicked(MouseEventArgs args, int x, int y)
     {
-        var boardPiece = board.Board[x, y];
-        if (args.Button == 0)
+        if(!isWinner && !isLoser)
         {
-            if (boardPiece.IsMine)
+            var boardPiece = board.Board[x, y];
+            if (args.Button == 0)
             {
-                boardPiece.Color = PieceColor.Mine;
-                isLosser = true;
-            }
-            else
-            {
-                boardPiece.IsRevealed = true;
-                if(boardPiece.NeighborBombCount == 0)
+                if (boardPiece.IsMine)
                 {
-                    boardPiece.Color = PieceColor.Blank;
-                    // generate BFS to reveale surrondings 
+                    boardPiece.Color = PieceColor.Mine;
+                    isLoser = true;
                 }
                 else
                 {
-                    boardPiece.Color = PieceColor.NeighborBomb;
+                    if (boardPiece.NeighborBombCount == 0)
+                    {
+                        boardPiece.Color = PieceColor.Blank;
+                        revealer.Reveale(board, (x, y), size);
+                    }
+                    else
+                    {
+                        boardPiece.IsRevealed = true;
+                        boardPiece.Color = PieceColor.NeighborBomb;
+                    }
                 }
             }
-        }
-        if (args.Button == 2)
-        {
-            boardPiece.Color = PieceColor.Safe;
+            if (args.Button == 2)
+            {
+                if (boardPiece.Color == PieceColor.MineFlag)
+                {
+                    boardPiece.Color = PieceColor.Initial;
+                    --flagCounter;
+                    if (boardPiece.IsMine) --correctGuess;
+                }
+                else
+                {
+                    boardPiece.Color = PieceColor.MineFlag;
+                    ++flagCounter;
+                    if (boardPiece.IsMine) ++correctGuess;
+                }
+            }
+
+            if (correctGuess == mineCount)
+            {
+                isWinner = true;
+            }
         }
     }
 
-
     private object GetBoardContent(int x, int y)
     {
-        return board.Board[x, y].IsRevealed
+        return board.Board[x, y].IsRevealed && board.Board[x, y].NeighborBombCount != 0
             ? board.Board[x, y].NeighborBombCount.ToString()
             : "";
     }
 
     private void Reset()
     {
+        board = new GameBoardGenerator().Generate(size, mineCount);
+        isWinner = false;
+        isLoser = false;
+        flagCounter = 0;
+        correctGuess = 0;
     }
 }
 
 @if (isWinner)
 {
-    <h2>Wins! <button class="btn btn-success" @onclick="@(() => Reset())">Reset</button></h2>
-} else if (isLosser)
+    <h2>You Win! <button class="btn btn-success" @onclick="@(() => Reset())">Reset</button></h2>
+} else if (isLoser)
 {
-    <h2>LOSSES! <button class="btn btn-success" @onclick="@(() => Reset())">Reset</button></h2>
+    <h2>You LOSE! <button class="btn btn-success" @onclick="@(() => Reset())">Reset</button></h2>
 } else
 {
-
+    <h2>@flagCounter / @mineCount</h2>
 }
 
 <div class="minesboard">
