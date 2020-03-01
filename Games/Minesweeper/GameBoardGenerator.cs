@@ -1,13 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using BlazorGames.Data.Minesweeper;
 using System.Linq;
 
 namespace BlazorGames.Games.Minesweeper
 {
-    public class GameBoardGenerator
+    public static class GameBoardGenerator
     {
-        public GameBoard Generate(int size, int mineCount)
+        public static GameBoard Generate(int size, int mineCount)
         {
             var board = new GameBoard(size);
 

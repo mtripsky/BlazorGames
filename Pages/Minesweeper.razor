@@ -2,37 +2,96 @@
 @using BlazorGames.Data.Minesweeper;
 @using BlazorGames.Games.Minesweeper;
 @using Microsoft.AspNetCore.Components.Web;
+@using System.Diagnostics;
+@using System.Linq;
+@using BlazorGames.Services;
+@using BlazorGames.Data.GameDb;
+@inject IEntityBaseRepository<MinesweeperGameResult> _resultRepository
 
 <h1>Minesweeper</h1>
 
+<p>
+    Choose a board size:
+    <select data-val="true" @bind="_boardSize">
+        <option selected="selected" value="10">10x10</option>
+        <option value="20">20x20</option>
+        <option value="30">30x30</option>
+    </select>
+
+    Choose a mine count:
+    <select data-val="true" @bind="_mineCount">
+        <option value="4">4</option>
+        <option selected="selected" value="10">10</option>
+        <option value="25">25</option>
+        <option value="25">50</option>
+        <option value="100">100</option>
+    </select>
+</p>
+<p>
+    <button @onclick="@(() => Reset())" type="button" class="btn btn-success">Start Game</button>
+</p>
+
 @code{
-    static int size = 10;
-    static int mineCount = 10;
-    GameBoard board = new GameBoardGenerator().Generate(size, mineCount);
-    GameBoardRevealer revealer = new GameBoardRevealer();
+    private int _boardSize { get; set; } = 10;
+    private int _mineCount { get; set; } = 10;
+    private string _player { get; set; }
+
+    private GameBoard _board;
     bool isWinner = false;
     bool isLoser = false;
     int flagCounter = 0;
     int correctGuess = 0;
+    bool start = false;
+    int seconds = 0;
+    private System.Threading.Timer _timer;
+    private Stopwatch _stopwatch;
+
+    protected override void OnInitialized()
+    {
+        _board = GameBoardGenerator
+            .Generate(_boardSize, _mineCount);
+        _stopwatch = new Stopwatch();
+    }
+
+    private void StopTimers()
+    {
+        _timer.Dispose();
+        _stopwatch.Stop();
+    }
 
     private void PieceClicked(MouseEventArgs args, int x, int y)
     {
-        if(!isWinner && !isLoser)
+        if (!start)
         {
-            var boardPiece = board.Board[x, y];
+            _stopwatch.Start();
+            _timer = new System.Threading.Timer((_) =>
+            {
+                InvokeAsync(() =>
+                {
+                    ++seconds;
+                    this.StateHasChanged();
+                });
+            }, null, 1000, 1000);
+            start = true;
+        }
+
+        if (!isWinner && !isLoser)
+        {
+            var boardPiece = _board.Board[x, y];
             if (args.Button == 0)
             {
                 if (boardPiece.IsMine)
                 {
                     boardPiece.Color = PieceColor.Mine;
                     isLoser = true;
+                    StopTimers();
                 }
                 else
                 {
                     if (boardPiece.NeighborBombCount == 0)
                     {
                         boardPiece.Color = PieceColor.Blank;
-                        revealer.Reveale(board, (x, y), size);
+                        GameBoardRevealer.Reveale(_board, (x, y), _boardSize);
                     }
                     else
                     {
@@ -57,57 +116,138 @@
                 }
             }
 
-            if (correctGuess == mineCount)
+            if (correctGuess == _mineCount)
             {
                 isWinner = true;
+                StopTimers();
             }
         }
     }
 
-    private object GetBoardContent(int x, int y)
+    private string GetBoardContent(int x, int y)
     {
-        return board.Board[x, y].IsRevealed && board.Board[x, y].NeighborBombCount != 0
-            ? board.Board[x, y].NeighborBombCount.ToString()
+        return _board.Board[x, y].IsRevealed && _board.Board[x, y].NeighborBombCount != 0
+            ? _board.Board[x, y].NeighborBombCount.ToString()
             : "";
     }
 
     private void Reset()
     {
-        board = new GameBoardGenerator().Generate(size, mineCount);
+        _board = GameBoardGenerator.Generate(_boardSize, _mineCount);
         isWinner = false;
         isLoser = false;
         flagCounter = 0;
         correctGuess = 0;
+        seconds = 0;
+        start = false;
+        _stopwatch.Reset();
+        _timer?.Dispose();
+    }
+
+    private void SaveResult(string name, TimeSpan time, int size, int minesCount)
+    {
+        var entry = new MinesweeperGameResult
+        {
+            PlayerName = name,
+            GameTime = time,
+            BoardSizeX = size,
+            BoardSizeY = size,
+            MinesCount = minesCount
+        };
+        _resultRepository.Create(entry);
     }
 }
 
-@if (isWinner)
+@if (_boardSize == 0
+    || (_board.Board.Length == _boardSize * _boardSize
+    && _board.Board.Cast<GamePiece>().ToArray().Count(x => x.IsMine) == _mineCount))
 {
-    <h2>You Win! <button class="btn btn-success" @onclick="@(() => Reset())">Reset</button></h2>
-} else if (isLoser)
-{
-    <h2>You LOSE! <button class="btn btn-success" @onclick="@(() => Reset())">Reset</button></h2>
-} else
-{
-    <h2>@flagCounter / @mineCount</h2>
-}
-
-<div class="minesboard">
-    @for (int i = 0; i < size; i++)
+    @if (isWinner)
     {
-        <div class="minescolumn">
-            @for (int j = 0; j < size; j++)
-            {
-                int x = i;
-                int y = j;
+        <h2>You WIN! </h2>
+        <h2>@_stopwatch.Elapsed.ToString(@"hh\:mm\:ss\:ms")</h2>
 
-                <div class="minesgamepiece @board.Board[i,j].Color.ToString().ToLower()"
-                     @onclick="@((args) => PieceClicked(args, x,y))"
-                     oncontextmenu="return false;"
-                     @onmouseup="@((args) => PieceClicked(args, x,y))">
-                    @GetBoardContent(x, y)
+        <div class="form-popup">
+            <form class="form-container">
+                <label for="name"><b>Name</b></label>
+                <input type="text" placeholder="Enter Name" @bind="_player" name="name" required>
+
+                <button type="submit" class="btn" @onclick="@(() => SaveResult(_player, _stopwatch.Elapsed, _boardSize, _mineCount))">Enter Result</button>
+            </form>
+        </div>
+
+        <h3>Top 5 results for @_boardSize x@_boardSize with @_mineCount mines</h3>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>
+                        Name
+                    </th>
+                    <th>
+                        Time
+                    </th>
+                    <th>
+                        Size
+                    </th>
+                    <th>
+                        #Mines
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in _resultRepository
+                    .GetAll(r => r.MinesCount == _mineCount && r.BoardSizeX == _boardSize)
+                    .OrderBy(r => r.GameTime)
+                    .Take(5))
+                {
+                    <tr>
+                        <td>
+                            @item.PlayerName
+                        </td>
+                        <td>
+                            @item.GameTime.ToString(@"hh\:mm\:ss\:ms")
+                        </td>
+                        <td>
+                            @item.BoardSizeX x @item.BoardSizeY
+                        </td>
+                        <td>
+                            @item.MinesCount
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        if (isLoser)
+        {
+            <h2>You LOSE! </h2>
+        }
+        else
+        {
+            <h2>@flagCounter / @_mineCount</h2>
+            <h2>Time: @seconds</h2>
+        }
+
+        <div class="minesboard">
+            @for (int i = 0; i < _boardSize; i++)
+            {
+                <div class="minescolumn">
+                    @for (int j = 0; j < _boardSize; j++)
+                    {
+                        int x = i;
+                        int y = j;
+
+                        <div class="minesgamepiece @_board.Board[i, j].Color.ToString().ToLower()"
+                             @onclick="@((args) => PieceClicked(args, x, y))"
+                             oncontextmenu="return false;"
+                             @onmouseup="@((args) => PieceClicked(args, x, y))">
+                            @GetBoardContent(x, y)
+                        </div>
+                    }
                 </div>
             }
         </div>
     }
-</div>
+}

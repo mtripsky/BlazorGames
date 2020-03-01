@@ -20,3 +20,24 @@
     <script src="_framework/blazor.server.js"></script>
 </body>
 </html>
+
+<script>
+    var count = 0, chkfn = null;
+    function startTimer() {
+        // Call function with 1000 milliseconds gap
+        count = 0;
+        chkfn = setInterval(updateCount, 1000);
+    }
+    function updateCount() {
+        count += 1;
+        //document.getElementById("pcount").innerHTML = "Your Time Starts: " + count;
+    }
+    function getTimeCount() {
+        return count;
+    }
+    function stopTimer() {
+        clearInterval(chkfn);
+        chkfn = null;
+        //document.getElementById("pcount").innerHTML = '';
+    }
+</script>

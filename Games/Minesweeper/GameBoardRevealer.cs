@@ -2,9 +2,9 @@
 
 namespace BlazorGames.Games.Minesweeper
 {
-    public class GameBoardRevealer
+    public static class GameBoardRevealer
     {
-        public void Reveale(GameBoard board, (int x, int y) coordinate, int size)
+        public static void Reveale(GameBoard board, (int x, int y) coordinate, int size)
         {
             if (board.Board[coordinate.x, coordinate.y].IsRevealed) return;
 
