@@ -1,3 +1,5 @@
+using BlazorGames.Data.GameDb;
+using BlazorGames.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -21,6 +23,10 @@ namespace BlazorGames
         {
             services.AddRazorPages();
             services.AddServerSideBlazor();
+            services.AddSingleton<IDatabaseClient<MinesweeperGameResult>, DatabaseClient<MinesweeperGameResult>>(s =>
+                new DatabaseClient<MinesweeperGameResult>("mongodb://localhost:27017/BlazorGames", "blazorgameDb"));
+            services.AddSingleton<IEntityBaseRepository<MinesweeperGameResult>, EntityBaseRepository<MinesweeperGameResult>>(s =>
+                new EntityBaseRepository<MinesweeperGameResult>(s.GetService<IDatabaseClient<MinesweeperGameResult>>(), "minesweeper"));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

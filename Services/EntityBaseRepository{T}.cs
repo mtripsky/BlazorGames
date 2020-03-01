@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using BeetleTracker.Models.Entities;
+using BlazorGames.Data.GameDb;
 using MongoDB.Driver;
 
-namespace BeetleTracker.Data
+namespace BlazorGames.Services
 {
     public class EntityBaseRepository<T> : IEntityBaseRepository<T>
         where T : IEntity
@@ -42,14 +42,14 @@ namespace BeetleTracker.Data
             return _collection.Find(p => true).ToList();
         }
 
+        public IEnumerable<T> GetAll(Func<T, bool> predicate)
+        {
+            return _collection.AsQueryable().Where(predicate);
+        }
+
         public T GetSingle(Guid id)
         {
             var entity = _collection.Find(p => p.Id == id).FirstOrDefault();
-
-            if(entity == null)
-            {
-                throw new EntityNotFoundException(nameof(T), id);
-            } 
 
             return entity;
         }
@@ -57,11 +57,6 @@ namespace BeetleTracker.Data
         public T GetSingle(Func<T, bool> predicate)
         {
             var entity = _collection.AsQueryable().FirstOrDefault(predicate);
-
-            if(entity == null)
-            {
-                throw new EntityNotFoundException(nameof(T), predicate);
-            } 
 
             return entity;
         }

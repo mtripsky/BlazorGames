@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq.Expressions;
 
-namespace BeetleTracker.Data
+namespace BlazorGames.Services
 {
     public interface IEntityBaseRepository<T>
     {
         IEnumerable<T> GetAll();
+
+        IEnumerable<T> GetAll(Func<T, bool> predicate);
 
         int Count();
 

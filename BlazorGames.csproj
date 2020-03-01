@@ -10,8 +10,15 @@
     <Folder Include="Games\" />
     <Folder Include="Games\Minesweeper\" />
     <Folder Include="wwwroot\css\images\" />
+    <Folder Include="Services\" />
+    <Folder Include="Data\GameDb\" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Components" Version="3.1.1" />
+    <PackageReference Include="MongoDB.Driver" Version="2.10.2" />
   </ItemGroup>
+
+  <PropertyGroup>
+    <UseAppHost>false</UseAppHost>
+  </PropertyGroup>
 </Project>

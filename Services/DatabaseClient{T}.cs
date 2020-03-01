@@ -1,7 +1,7 @@
 ﻿using System;
 using MongoDB.Driver;
 
-namespace BeetleTracker.Data
+namespace BlazorGames.Services
 {
     public class DatabaseClient<T> : IDatabaseClient<T>
     {
